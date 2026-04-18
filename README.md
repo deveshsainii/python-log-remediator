@@ -12,7 +12,7 @@ A high-performance, production-grade SRE (Site Reliability Engineering) tool des
 ## 🚀 Tech Stack
 
 - **Core**: Python 3.11+ (High-performance generators for GB-scale streaming)
-- **Monitoring**: [Prometheus](https://prometheus.io/) (Native instrumentation for alerting)
+- **Monitoring**: [Prometheus](https://prometheus.io/) & **Premium Web Dashboard** (Built-in)
 - **Notifications**: Email alerts with throttling and SMTP support.
 - **Security & Retries**: [Tenacity](https://tenacity.readthedocs.io/) (Exponential backoff for mission-critical actions)
 - **UI/Terminal**: [Rich](https://github.com/Textualize/rich) (Beautiful, colored log output)
@@ -125,6 +125,19 @@ rules:
 | `--follow` | Enable `tail -f` real-time mode | `False` |
 | `--dry-run` | Detect but do not execute | `False` |
 | `--metrics-port` | Port for Prometheus server | `8000` |
+
+---
+
+## 🖥️ Premium SRE Dashboard
+
+The tool now includes a built-in, high-end web dashboard for real-time visualization.
+
+- **URL**: `http://localhost:8080` (Default)
+- **Features**: 
+    - Real-time "Speedometer" metrics.
+    - Live incident feed.
+    - Interactive rule distribution charts (Doughnut).
+    - Dark-mode optimized for NOC (Network Operations Center) displays.
 
 ---
 

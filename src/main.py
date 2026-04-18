@@ -3,6 +3,7 @@ import logging
 import sys
 import os
 import signal
+import threading
 from rich.console import Console
 from rich.logging import RichHandler
 from prometheus_client import start_http_server
@@ -13,6 +14,7 @@ from log_parser import LogParser
 from detector import Detector
 from remediator import Remediator
 from notifier import Notifier
+from dashboard import run_dashboard
 
 # Setup Rich console and logging
 console = Console()
@@ -53,7 +55,11 @@ def main():
         remediator = Remediator(dry_run=args.dry_run)
         notifier = Notifier(config)
 
-        # 3. Start Metrics Server (Robustly)
+        # 3. Start Dashboard (New)
+        logger.info("Starting Dashboard on http://localhost:8080")
+        threading.Thread(target=run_dashboard, args=(8080,), daemon=True).start()
+
+        # 4. Start Metrics Server (Robustly)
         try:
             logger.info(f"Starting Prometheus server on port {args.metrics_port}")
             start_http_server(args.metrics_port)

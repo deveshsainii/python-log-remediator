@@ -1,7 +1,7 @@
 import time
 import os
-import logging
 from typing import Generator, Optional, Dict
+from state_manager import StateManager
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +12,7 @@ class LogParser:
         self.path = path
         self.follow = follow
         self._offsets: Dict[str, int] = {}
+        self.state = StateManager()
 
     def stream_logs(self) -> Generator[str, None, None]:
         """Yields log lines from a file or all files in a directory."""
@@ -44,6 +45,7 @@ class LogParser:
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 for line in f:
+                    self.state.update_stats("logs_processed")
                     yield line.strip()
                 self._offsets[file_path] = f.tell()
                 
@@ -69,6 +71,7 @@ class LogParser:
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                     f.seek(last_offset)
                     for line in f:
+                        self.state.update_stats("logs_processed")
                         yield line.strip()
                     self._offsets[file_path] = f.tell()
             elif current_size < last_offset:

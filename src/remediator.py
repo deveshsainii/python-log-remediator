@@ -5,6 +5,7 @@ import shutil
 from typing import Dict, Any, Optional
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from prometheus_client import Counter
+from state_manager import StateManager
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,7 @@ class Remediator:
     
     def __init__(self, dry_run: bool = False):
         self.dry_run = dry_run
+        self.state = StateManager()
 
     def execute(self, remediation_config: Dict[str, Any]):
         """Entry point for remediation execution."""
@@ -33,9 +35,13 @@ class Remediator:
         try:
             self._dispatch(action, target, retries)
             REMEDIATIONS.labels(action=action, status='success').inc()
+            self.state.update_stats("remediations_success")
+            self.state.add_event("REMEDIATION", f"Success: {action} on {target}", "INFO")
         except Exception as e:
             logger.error(f"Remediation failed after retries: {str(e)}")
             REMEDIATIONS.labels(action=action, status='failed').inc()
+            self.state.update_stats("remediations_failed")
+            self.state.add_event("REMEDIATION", f"Failed: {action} on {target}", "CRITICAL")
 
     def _dispatch(self, action: str, target: str, retries: int):
         """Dispatches to specific remediation logic with retries."""

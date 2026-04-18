@@ -2,6 +2,7 @@ import re
 import logging
 from typing import List, Dict, Any, Optional
 from prometheus_client import Counter
+from state_manager import StateManager
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,7 @@ class Detector:
     
     def __init__(self, rules: List[Dict[str, Any]]):
         self.rules = self._compile_rules(rules)
+        self.state = StateManager()
 
     def _compile_rules(self, rules: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Pre-compiles regex patterns for performance."""
@@ -34,5 +36,11 @@ class Detector:
             if rule['_regex'].search(line):
                 logger.warning(f"Detection: Rule '{rule['name']}' matched line: {line[:100]}...")
                 ERRORS_DETECTED.labels(rule_name=rule['name'], severity=rule['severity']).inc()
+                
+                # Update Dashboard State
+                self.state.update_stats("errors_detected")
+                self.state.increment_rule(rule['name'])
+                self.state.add_event("DETECTION", f"Matched: {rule['name']}", rule['severity'])
+                
                 return rule
         return None
