@@ -13,6 +13,7 @@ A high-performance, production-grade SRE (Site Reliability Engineering) tool des
 
 - **Core**: Python 3.11+ (High-performance generators for GB-scale streaming)
 - **Monitoring**: [Prometheus](https://prometheus.io/) (Native instrumentation for alerting)
+- **Notifications**: Email alerts with throttling and SMTP support.
 - **Security & Retries**: [Tenacity](https://tenacity.readthedocs.io/) (Exponential backoff for mission-critical actions)
 - **UI/Terminal**: [Rich](https://github.com/Textualize/rich) (Beautiful, colored log output)
 - **Containerization**: Docker (Alpine/Slim based lightweight images)
@@ -124,6 +125,33 @@ rules:
 | `--follow` | Enable `tail -f` real-time mode | `False` |
 | `--dry-run` | Detect but do not execute | `False` |
 | `--metrics-port` | Port for Prometheus server | `8000` |
+
+---
+
+## 🔔 Email Notifications
+
+The tool features a robust notification system with built-in throttling (alert fatigue protection).
+
+### Configuration
+Update the `notifications` block in your YAML config:
+
+```yaml
+notifications:
+  email:
+    enabled: true
+    recipient: "admin@example.com"
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    cooldown_seconds: 300 # Wait 5 minutes between alerts for the same rule
+```
+
+### Security (Secrets Management)
+To protect your SMTP credentials, use environment variables:
+
+```bash
+export SMTP_USER="your-email@gmail.com"
+export SMTP_PASS="your-app-password"
+```
 
 ---
 
