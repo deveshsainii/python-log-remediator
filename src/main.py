@@ -12,6 +12,7 @@ from config_loader import ConfigLoader
 from log_parser import LogParser
 from detector import Detector
 from remediator import Remediator
+from notifier import Notifier
 
 # Setup Rich console and logging
 console = Console()
@@ -50,6 +51,7 @@ def main():
         parser_instance = LogParser(log_source, follow=args.follow)
         detector = Detector(config_loader.rules)
         remediator = Remediator(dry_run=args.dry_run)
+        notifier = Notifier(config)
 
         # 3. Start Metrics Server (Robustly)
         try:
@@ -66,6 +68,9 @@ def main():
             if match:
                 console.print(f"[bold red]CRITICAL:[/bold red] Detected rule match: [yellow]{match['name']}[/yellow]")
                 
+                # Trigger Notification
+                notifier.send_alert(match, line)
+
                 if 'remediation' in match:
                     remediator.execute(match['remediation'])
                 else:

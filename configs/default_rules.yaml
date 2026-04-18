@@ -2,6 +2,15 @@
 log_source: "logs/"
 prometheus_port: 8000
 
+# NEW: Global notification settings
+notifications:
+  email:
+    enabled: true
+    recipient: "admin@example.com"
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    cooldown_seconds: 60  # Only alert once per minute for the same rule
+
 rules:
   - name: "Out of Memory Critical"
     pattern: "OutOfMemoryError"
