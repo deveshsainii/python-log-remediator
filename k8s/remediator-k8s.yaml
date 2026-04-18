@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: log-remediator-config
+  namespace: default
+data:
+  default_rules.yaml: |
+    log_source: "/var/log/app"
+    prometheus_port: 8000
+    rules:
+      - name: "Out of Memory K8s"
+        pattern: "OutOfMemoryError"
+        severity: "CRITICAL"
+        remediation:
+          action: "restart_service"
+          target: "app-container"
+          retries: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-remediator
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-remediator
+  template:
+    metadata:
+      labels:
+        app: log-remediator
+    spec:
+      containers:
+      - name: remediator
+        image: log-remediator:latest # Assuming local build or registry
+        args: ["--config", "/etc/config/default_rules.yaml", "--logs", "/var/log/app", "--follow"]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+        - name: log-volume
+          mountPath: /var/log/app
+        ports:
+        - containerPort: 8000
+          name: metrics
+      volumes:
+      - name: config-volume
+        configMap:
+          name: log-remediator-config
+      - name: log-volume
+        hostPath:
+          path: /var/log # Mount host log dir for demonstration
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: log-remediator-metrics
+  namespace: default
+spec:
+  selector:
+    app: log-remediator
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  type: ClusterIP

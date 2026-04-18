@@ -1,0 +1,28 @@
+# Log Analysis Rules
+log_source: "logs/"
+prometheus_port: 8000
+
+rules:
+  - name: "Out of Memory Critical"
+    pattern: "OutOfMemoryError"
+    severity: "CRITICAL"
+    remediation:
+      action: "restart_service"
+      target: "java-service"
+      retries: 3
+
+  - name: "Connection Timeout"
+    pattern: "Connection refused"
+    severity: "WARNING"
+    remediation:
+      action: "kill_process"
+      target: "stale-worker"
+      retries: 1
+
+  - name: "Disk Space Warning"
+    pattern: "Disk space low"
+    severity: "CRITICAL"
+    remediation:
+      action: "clear_cache"
+      target: "/tmp/app-cache"
+      retries: 2
